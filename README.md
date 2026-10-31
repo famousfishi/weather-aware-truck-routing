@@ -1,2 +1,2 @@
 # weather-aware-truck-routing
- React + Django web app that helps a truck driver choose the safest route based on weather, load weight, and travel time. 
+Django REST API + React, TypeScript and Material UI app that compares a truck routes by forecast weather risk at every checkpoint. 
