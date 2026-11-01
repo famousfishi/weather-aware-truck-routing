@@ -1,6 +1,9 @@
 from django.urls import path
-from .views import HealthCheckView
+
+from .views import HealthView, PlaceSuggestView, TripPlanView
 
 urlpatterns = [
-    path("health", HealthCheckView.as_view()),
+    path("health", HealthView.as_view()),
+    path("places/suggest", PlaceSuggestView.as_view()),
+    path("trips/plan", TripPlanView.as_view()),
 ]

@@ -55,6 +55,7 @@ REST_FRAMEWORK = {
     "UNAUTHENTICATED_USER": None,
     "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.AnonRateThrottle"],
     "DEFAULT_THROTTLE_RATES": {"anon": "120/min"},
+    "EXCEPTION_HANDLER": "trips.exception_handler.api_exception_handler",
 }
 
 LOGGING = {
