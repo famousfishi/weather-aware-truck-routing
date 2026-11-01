@@ -1,6 +1,8 @@
-import { AppBar, Box, Stack, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, Chip, Stack, Toolbar, Typography } from '@mui/material';
+import { useDemoMode } from './hooks/useDemoMode';
 
 export default function App() {
+    const demoMode = useDemoMode();
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
             <AppBar position="static" color="inherit" sx={{ borderBottom: 1, borderColor: 'divider' }} elevation={0}>
@@ -8,6 +10,7 @@ export default function App() {
                     <Typography variant="h1" component="h1">
                         Weather-Aware Truck Routing
                     </Typography>
+                    {demoMode && <Chip size="small" color="warning" label="Demo data" sx={{ ml: 1, fontWeight: 700 }} />}
                 </Toolbar>
             </AppBar>
 
