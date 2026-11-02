@@ -15,6 +15,18 @@ export interface TripPlanRequest {
     departure_time: string;
     load_weight_lb: number;
     sample_interval_miles: SampleInterval;
+    weather?: WeatherBatch[];
+}
+
+// Browser-weather mode: a forecast download the server asks for, and what the browser sends back after fetching it.
+export interface WeatherRequest {
+    url: string;
+    points: [number, number][];
+}
+
+export interface WeatherBatch {
+    points: [number, number][];
+    body: unknown;
 }
 
 export interface Place {

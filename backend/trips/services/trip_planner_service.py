@@ -56,6 +56,7 @@ class TripPlannerService:
             start=heatmap_start,
             end=max(last_arrival, heatmap_start +
                     timedelta(hours=HEATMAP_HOURS)),
+            browser_weather=request.browser_weather,
         )
 
         # 6. Score each route, then rank and explain.

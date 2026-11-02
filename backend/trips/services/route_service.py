@@ -15,13 +15,30 @@ LEGAL_GROSS_LIMIT_LB = 80_000
 KG_PER_LB = 0.45359237
 DETOUR_OFFSETS = (0.15, -0.15, 0.3, -0.3)
 SAME_ROUTE_DISTANCE_DIFFERENCE = 0.005
+CACHE_SECONDS = 10 * 60
 
 
 class RouteService:
-    def __init__(self, router):
+    def __init__(self, router, cache):
         self._router = router
+        self._cache = cache
 
     def find_routes(self, origin: GeoPoint, destination: GeoPoint, departure_time: datetime, load_weight_lb: int) -> list[RouteOption]:
+        """Same as calculate_routes, but remembered for 10 minutes. Asking again for the same trip (for example
+        once the browser has fetched the weather) gets exactly the same routes, and saves TomTom calls.
+        """
+        cache_key = (
+            f"routes:{origin.lat:.5f},{origin.lng:.5f}:{destination.lat:.5f},{destination.lng:.5f}"
+            f":{departure_time.isoformat()}:{load_weight_lb}"
+        )
+        routes = self._cache.get(cache_key)
+        if routes is None:
+            routes = self.calculate_routes(
+                origin, destination, departure_time, load_weight_lb)
+            self._cache.set(cache_key, routes, CACHE_SECONDS)
+        return routes
+
+    def calculate_routes(self, origin: GeoPoint, destination: GeoPoint, departure_time: datetime, load_weight_lb: int) -> list[RouteOption]:
         """Asks for the best route plus 2 alternatives. If the provider returns fewer than 3 distinct
         routes (common on short trips), we ask for routes through a point off to each side of the
         straight line to find genuinely different roads. Result is sorted fastest first.

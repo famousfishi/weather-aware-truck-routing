@@ -1,4 +1,13 @@
-export class ApiError extends Error { }
+export class ApiError extends Error {
+    status: number;
+    body: unknown;
+
+    constructor(message: string, status = 0, body: unknown = null) {
+        super(message);
+        this.status = status;
+        this.body = body;
+    }
+}
 
 // Every API error from Django comes back as { "detail": "..." }.
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -15,7 +24,7 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
     const body = await response.json().catch(() => null);
     if (!response.ok) {
-        throw new ApiError(body?.detail ?? `The server returned an error (${response.status}).`);
+        throw new ApiError(body?.detail ?? `The server returned an error (${response.status}).`, response.status, body);
     }
     return body as T;
 }

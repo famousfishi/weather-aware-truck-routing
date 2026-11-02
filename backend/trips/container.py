@@ -37,8 +37,11 @@ def place_service() -> PlaceService:
 def trip_planner() -> TripPlannerService:
     return TripPlannerService(
         places=place_service(),
-        routes=RouteService(tomtom_client()),
-        weather=WeatherService(weather_client(), cache),
+        routes=RouteService(tomtom_client(), cache),
+        # Demo mode never needs the internet, so it always uses the built-in weather on the server.
+        weather=WeatherService(
+            weather_client(), cache, from_browser=settings.WEATHER_FROM_BROWSER and not settings.USE_FAKE_PROVIDERS
+        ),
     )
 
 
