@@ -1,4 +1,5 @@
 import os
+import re
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -24,6 +25,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.gzip.GZipMiddleware",
     "django.middleware.common.CommonMiddleware",
 ]
@@ -38,6 +40,18 @@ TIME_ZONE = "UTC"
 USE_TZ = True
 
 STATIC_URL = "static/"
+
+# In production the built React app lives in backend/frontend_dist and is served at "/".
+FRONTEND_DIST = BASE_DIR / "frontend_dist"
+if FRONTEND_DIST.exists():
+    WHITENOISE_ROOT = FRONTEND_DIST
+    WHITENOISE_INDEX_FILE = True
+
+
+def WHITENOISE_IMMUTABLE_FILE_TEST(path, url):
+    # Vite puts a content hash in asset names (index-a1b2c3d4.js), so those can be cached forever.
+    return re.match(r"^.+[.-][0-9a-zA-Z_-]{8,12}\..+$", url)
+
 
 REDIS_URL = os.getenv("REDIS_URL", "")
 if REDIS_URL:
