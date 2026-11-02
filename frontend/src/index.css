@@ -9,6 +9,11 @@ body,
   background: #e8ecea;
 }
 
+/* OpenStreetMap tiles are colorful; turn them light grey so the risk colors stand out. */
+.leaflet-tile-pane {
+  filter: grayscale(1) contrast(0.85) brightness(1.08);
+}
+
 .leaflet-tooltip {
   font-family: 'Overpass', system-ui, sans-serif;
   font-size: 12px;

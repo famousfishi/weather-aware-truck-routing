@@ -1,23 +1,31 @@
 import { Alert, AppBar, Box, Chip, Stack, Toolbar, Typography } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
+import { CheckpointTable } from './components/CheckpointTable';
+import { RiskLegend } from './components/map/RiskLegend';
+import { TripMap } from './components/map/TripMap';
 import { RecommendationSign } from './components/RecommendationSign';
 import { RouteCard } from './components/RouteCard';
 import { RouteShield } from './components/RouteShield';
 import { TripForm } from './components/TripForm';
 import { useDemoMode } from './hooks/useDemoMode';
 import { useTripPlan } from './hooks/useTripPlan';
+import type { Checkpoint } from './types/api';
 
 export default function App() {
     const { plan, loading, error, planTrip, clearError } = useTripPlan();
     const demoMode = useDemoMode();
     const [selectedRouteId, setSelectedRouteId] = useState('');
+    const [focusedCheckpoint, setFocusedCheckpoint] = useState<Checkpoint | null>(null);
 
-    // A new plan starts on the recommended route.
+    // A new plan starts on the recommended route, with no checkpoint picked.
     useEffect(() => {
-        if (plan) setSelectedRouteId(plan.recommendation.route_id);
+        if (!plan) return;
+        setSelectedRouteId(plan.recommendation.route_id);
+        setFocusedCheckpoint(null);
     }, [plan]);
 
     const selectRoute = useCallback((routeId: string) => setSelectedRouteId(routeId), []);
+    const selectedRoute = plan?.routes.find((route) => route.id === selectedRouteId);
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -67,15 +75,17 @@ export default function App() {
                                         <RouteCard key={route.id} route={route} selected={route.id === selectedRouteId} onSelect={selectRoute} />
                                     ))}
                                 </Stack>
+                                {selectedRoute && (
+                                    <CheckpointTable route={selectedRoute} intervalMiles={plan.sample_interval_miles} onFocusCheckpoint={setFocusedCheckpoint} />
+                                )}
                             </>
                         )}
                     </Stack>
                 </Box>
 
                 <Box component="main" sx={{ flex: 1, position: 'relative', minHeight: { xs: '65vh', md: 0 }, order: { xs: -1, md: 0 } }}>
-                    <Typography color="text.secondary" sx={{ p: 2 }}>
-                        The map goes here.
-                    </Typography>
+                    <TripMap plan={plan} selectedRouteId={selectedRouteId} onSelectRoute={selectRoute} focusedCheckpoint={focusedCheckpoint} />
+                    <RiskLegend />
                 </Box>
             </Box>
         </Box>
