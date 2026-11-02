@@ -1,8 +1,12 @@
-import { AppBar, Box, Chip, Stack, Toolbar, Typography } from '@mui/material';
+import { Alert, AppBar, Box, Chip, Stack, Toolbar, Typography } from '@mui/material';
+import { TripForm } from './components/TripForm';
 import { useDemoMode } from './hooks/useDemoMode';
+import { useTripPlan } from './hooks/useTripPlan';
 
 export default function App() {
+    const { plan, loading, error, planTrip, clearError } = useTripPlan();
     const demoMode = useDemoMode();
+
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
             <AppBar position="static" color="inherit" sx={{ borderBottom: 1, borderColor: 'divider' }} elevation={0}>
@@ -27,9 +31,22 @@ export default function App() {
                     }}
                 >
                     <Stack spacing={2}>
-                        <Typography variant="body2" color="text.secondary">
-                            The trip form goes here.
-                        </Typography>
+                        <TripForm loading={loading} onSubmit={planTrip} />
+
+                        {error && (
+                            <Alert severity="error" onClose={clearError}>
+                                {error}
+                            </Alert>
+                        )}
+
+                        {!plan && !error && (
+                            <Typography variant="body2" color="text.secondary" sx={{ px: 0.5 }}>
+                                Enter a trip to compare three routes. Each one is checked against the forecast for the hour the
+                                truck reaches every checkpoint, then ranked by Severe miles, High miles, average risk and drive time.
+                            </Typography>
+                        )}
+
+                        {plan && <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{JSON.stringify(plan.recommendation, null, 2)}</pre>}
                     </Stack>
                 </Box>
 
