@@ -1,3 +1,4 @@
+import { PlaceField } from './PlaceField';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
 import {
     Box,
@@ -72,22 +73,8 @@ export function TripForm({ loading, onSubmit }: Props) {
             <Stack spacing={1.5}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 1, alignItems: 'center' }}>
                     <Stack spacing={1.5}>
-                        <TextField
-                            label="From"
-                            placeholder="City, address or depot"
-                            value={origin.query}
-                            onChange={(e) => setOrigin({ query: e.target.value })}
-                            disabled={loading}
-                            required
-                        />
-                        <TextField
-                            label="To"
-                            placeholder="City, address or depot"
-                            value={destination.query}
-                            onChange={(e) => setDestination({ query: e.target.value })}
-                            disabled={loading}
-                            required
-                        />
+                        <PlaceField label="From" value={origin} onChange={setOrigin} disabled={loading} />
+                        <PlaceField label="To" value={destination} onChange={setDestination} disabled={loading} />
                     </Stack>
                     <Tooltip title="Swap from and to">
                         <span>
