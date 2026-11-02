@@ -1,6 +1,7 @@
-import { Alert, AppBar, Box, Chip, Stack, Toolbar, Typography } from '@mui/material';
+import { Alert, AppBar, Box, Chip, LinearProgress, Stack, Toolbar, Typography } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { CheckpointTable } from './components/CheckpointTable';
+import { HeatmapTimeline } from './components/map/HeatmapTimeline';
 import { RiskLegend } from './components/map/RiskLegend';
 import { TripMap } from './components/map/TripMap';
 import { RecommendationSign } from './components/RecommendationSign';
@@ -15,12 +16,15 @@ export default function App() {
     const { plan, loading, error, planTrip, clearError } = useTripPlan();
     const demoMode = useDemoMode();
     const [selectedRouteId, setSelectedRouteId] = useState('');
+    const [heatmapHour, setHeatmapHour] = useState(0);
+    const [showHeatmap, setShowHeatmap] = useState(true);
     const [focusedCheckpoint, setFocusedCheckpoint] = useState<Checkpoint | null>(null);
 
-    // A new plan starts on the recommended route, with no checkpoint picked.
+    // A new plan starts on the recommended route, at departure time.
     useEffect(() => {
         if (!plan) return;
         setSelectedRouteId(plan.recommendation.route_id);
+        setHeatmapHour(0);
         setFocusedCheckpoint(null);
     }, [plan]);
 
@@ -84,8 +88,26 @@ export default function App() {
                 </Box>
 
                 <Box component="main" sx={{ flex: 1, position: 'relative', minHeight: { xs: '65vh', md: 0 }, order: { xs: -1, md: 0 } }}>
-                    <TripMap plan={plan} selectedRouteId={selectedRouteId} onSelectRoute={selectRoute} focusedCheckpoint={focusedCheckpoint} />
+                    {loading && <LinearProgress sx={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1100 }} />}
+                    <TripMap
+                        plan={plan}
+                        selectedRouteId={selectedRouteId}
+                        onSelectRoute={selectRoute}
+                        heatmapHour={heatmapHour}
+                        showHeatmap={showHeatmap}
+                        focusedCheckpoint={focusedCheckpoint}
+                    />
                     <RiskLegend />
+                    {plan && (
+                        <HeatmapTimeline
+                            startTime={plan.heatmap.start_time}
+                            hours={plan.heatmap.hours}
+                            hour={heatmapHour}
+                            onHourChange={setHeatmapHour}
+                            showHeatmap={showHeatmap}
+                            onShowHeatmapChange={setShowHeatmap}
+                        />
+                    )}
                 </Box>
             </Box>
         </Box>

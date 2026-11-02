@@ -4,11 +4,15 @@ import type { Checkpoint, Place, TripPlan } from '../../types/api';
 import { CheckpointLayer } from './CheckpointLayer';
 import { FitToPlan, FlyToCheckpoint } from './MapEffects';
 import { RouteLayers } from './RouteLayers';
+import { TruckMarker } from './TruckMarker';
+import { WeatherHeatLayer } from './WeatherHeatLayer';
 
 interface Props {
     plan: TripPlan | null;
     selectedRouteId: string;
     onSelectRoute: (routeId: string) => void;
+    heatmapHour: number;
+    showHeatmap: boolean;
     focusedCheckpoint: Checkpoint | null;
 }
 
@@ -22,7 +26,10 @@ function Endpoint({ place, label }: { place: Place; label: string }) {
     );
 }
 
-export function TripMap({ plan, selectedRouteId, onSelectRoute, focusedCheckpoint }: Props) {
+export function TripMap({ plan, selectedRouteId, onSelectRoute, heatmapHour, showHeatmap, focusedCheckpoint }: Props) {
+    const selectedRoute = plan?.routes.find((route) => route.id === selectedRouteId);
+    const heatmapTime = plan ? Date.parse(plan.heatmap.start_time) + heatmapHour * 3_600_000 : 0;
+
     return (
         <MapContainer center={[39.5, -98.35]} zoom={4} minZoom={3} style={{ height: '100%', width: '100%' }}>
             <TileLayer
@@ -34,10 +41,12 @@ export function TripMap({ plan, selectedRouteId, onSelectRoute, focusedCheckpoin
                 <>
                     <FitToPlan plan={plan} />
                     <FlyToCheckpoint checkpoint={focusedCheckpoint} />
+                    <WeatherHeatLayer heatmap={plan.heatmap} hour={heatmapHour} visible={showHeatmap} />
                     <RouteLayers routes={plan.routes} selectedId={selectedRouteId} onSelect={onSelectRoute} />
                     <CheckpointLayer routes={plan.routes} selectedId={selectedRouteId} />
                     <Endpoint place={plan.origin} label="Start" />
                     <Endpoint place={plan.destination} label="End" />
+                    {selectedRoute && <TruckMarker route={selectedRoute} time={heatmapTime} />}
                 </>
             )}
         </MapContainer>
