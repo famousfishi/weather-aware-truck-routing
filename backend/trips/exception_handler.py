@@ -5,7 +5,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import exception_handler as drf_exception_handler
 
-from .exceptions import ExternalServiceError, LocationNotFoundError, RouteNotFoundError
+from .exceptions import ExternalServiceError, LocationNotFoundError, RouteNotFoundError, WeatherNeededError
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +14,13 @@ def api_exception_handler(exc, context):
     """One place that turns errors into a consistent {"detail": "..."} JSON response."""
     if isinstance(exc, (LocationNotFoundError, RouteNotFoundError)):
         return Response({"detail": str(exc)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    if isinstance(exc, WeatherNeededError):
+        # 428 Precondition Required: "fetch these forecasts, then send the same request again with them".
+        return Response(
+            {"detail": str(exc), "weather_requests": exc.weather_requests},
+            status=status.HTTP_428_PRECONDITION_REQUIRED,
+        )
 
     if isinstance(exc, ExternalServiceError):
         logger.warning("External service failed: %s", exc)

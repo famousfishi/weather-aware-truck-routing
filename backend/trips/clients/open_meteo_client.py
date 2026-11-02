@@ -26,15 +26,41 @@ class OpenMeteoClient:
 
         Open-Meteo accepts many locations in one call, so we send them in batches, a few batches at a time.
         """
-        batches = [points[i: i + self.LOCATIONS_PER_REQUEST]
-                   for i in range(0, len(points), self.LOCATIONS_PER_REQUEST)]
         with ThreadPoolExecutor(max_workers=self.PARALLEL_REQUESTS) as pool:
             results = pool.map(lambda batch: self._fetch_batch(
-                batch, start_date, end_date), batches)
+                batch, start_date, end_date), self.batches(points))
         return [hourly for batch_result in results for hourly in batch_result]
 
+    def browser_requests(self, points: list[GeoPoint], start_date: date, end_date: date) -> list[dict]:
+        """The same batched requests as fetch_hourly, as ready-to-call URLs for the browser to fetch."""
+        return [
+            {"url": self._browser_url(batch, start_date, end_date), "points": [
+                [p.lat, p.lng] for p in batch]}
+            for batch in self.batches(points)
+        ]
+
+    def _browser_url(self, points: list[GeoPoint], start_date: date, end_date: date) -> str:
+        """The free endpoint with its query string filled in (the browser never needs an API key)."""
+        return requests.Request("GET", self.FREE_URL, params=self._params(points, start_date, end_date)).prepare().url
+
+    def batches(self, points: list[GeoPoint]) -> list[list[GeoPoint]]:
+        return [points[i: i + self.LOCATIONS_PER_REQUEST] for i in range(0, len(points), self.LOCATIONS_PER_REQUEST)]
+
     def _fetch_batch(self, points: list[GeoPoint], start_date: date, end_date: date) -> list[HourlyWeather]:
-        params = {
+        params = self._params(points, start_date, end_date)
+        if self._api_key:
+            params["apikey"] = self._api_key
+        return self.parse(get_json(self._session, self._url, params, "Open-Meteo weather", self._timeout))
+
+    @staticmethod
+    def parse(body) -> list[HourlyWeather]:
+        """One location comes back as an object, several as a list; either way, one HourlyWeather per location."""
+        locations = body if isinstance(body, list) else [body]
+        return [to_hourly_weather(location["hourly"]) for location in locations]
+
+    @staticmethod
+    def _params(points: list[GeoPoint], start_date: date, end_date: date) -> dict:
+        return {
             "latitude": ",".join(f"{p.lat:.4f}" for p in points),
             "longitude": ",".join(f"{p.lng:.4f}" for p in points),
             "hourly": "wind_speed_10m,rain,showers,snowfall",
@@ -44,12 +70,6 @@ class OpenMeteoClient:
             "start_date": start_date.isoformat(),
             "end_date": end_date.isoformat(),
         }
-        if self._api_key:
-            params["apikey"] = self._api_key
-        body = get_json(self._session, self._url, params,
-                        "Open-Meteo weather", self._timeout)
-        locations = body if isinstance(body, list) else [body]
-        return [to_hourly_weather(location["hourly"]) for location in locations]
 
 
 def to_hourly_weather(hourly: dict) -> HourlyWeather:

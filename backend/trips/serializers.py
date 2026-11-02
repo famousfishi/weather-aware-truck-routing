@@ -1,3 +1,5 @@
+"""Request validation (like request DTOs + model validation in ASP.NET)."""
+
 from datetime import timedelta
 
 from django.utils import timezone
@@ -21,6 +23,15 @@ class LocationInputSerializer(serializers.Serializer):
         return data
 
 
+class BrowserWeatherSerializer(serializers.Serializer):
+    """One Open-Meteo answer the browser fetched: the points it asked for, and the raw JSON it got back."""
+
+    points = serializers.ListField(
+        child=serializers.ListField(child=serializers.FloatField(), min_length=2, max_length=2), max_length=100
+    )
+    body = serializers.JSONField()
+
+
 class TripPlanRequestSerializer(serializers.Serializer):
     origin = LocationInputSerializer()
     destination = LocationInputSerializer()
@@ -35,6 +46,8 @@ class TripPlanRequestSerializer(serializers.Serializer):
     )
     sample_interval_miles = serializers.ChoiceField(
         choices=[10, 25, 50], default=25)
+    weather = serializers.ListField(
+        child=BrowserWeatherSerializer(), required=False, max_length=20)
 
     def validate_departure_time(self, value):
         now = timezone.now()
@@ -53,6 +66,7 @@ class TripPlanRequestSerializer(serializers.Serializer):
             departure_time=data["departure_time"],
             load_weight_lb=data["load_weight_lb"],
             sample_interval_miles=data["sample_interval_miles"],
+            browser_weather=data.get("weather", []),
         )
 
 

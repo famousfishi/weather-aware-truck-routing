@@ -14,3 +14,5 @@ services:
         value: .onrender.com
       - key: GEOCODE_COUNTRY_SET
         value: US,CA
+      - key: WEATHER_FROM_BROWSER
+        value: "true"

@@ -1,6 +1,6 @@
 """Internal models the services pass between each other (never sent to the browser directly)."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import IntEnum
 
@@ -47,6 +47,8 @@ class TripRequest:
     departure_time: datetime
     load_weight_lb: int
     sample_interval_miles: int
+    # forecasts the browser fetched (browser-weather mode)
+    browser_weather: list[dict] = field(default_factory=list)
 
 
 @dataclass
