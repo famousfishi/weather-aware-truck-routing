@@ -2,6 +2,8 @@ import { Alert, AppBar, Box, Chip, Stack, Toolbar, Typography } from '@mui/mater
 import { TripForm } from './components/TripForm';
 import { useDemoMode } from './hooks/useDemoMode';
 import { useTripPlan } from './hooks/useTripPlan';
+import { RecommendationSign } from './components/RecommendationSign';
+import { RouteShield } from './components/RouteShield';
 
 export default function App() {
     const { plan, loading, error, planTrip, clearError } = useTripPlan();
@@ -11,6 +13,7 @@ export default function App() {
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
             <AppBar position="static" color="inherit" sx={{ borderBottom: 1, borderColor: 'divider' }} elevation={0}>
                 <Toolbar variant="dense" sx={{ gap: 1.25 }}>
+                    <RouteShield letter="" size={22} />
                     <Typography variant="h1" component="h1">
                         Weather-Aware Truck Routing
                     </Typography>
@@ -46,7 +49,7 @@ export default function App() {
                             </Typography>
                         )}
 
-                        {plan && <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{JSON.stringify(plan.recommendation, null, 2)}</pre>}
+                        {plan && <RecommendationSign recommendation={plan.recommendation} />}
                     </Stack>
                 </Box>
 
