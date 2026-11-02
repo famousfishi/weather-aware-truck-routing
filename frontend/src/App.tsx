@@ -1,13 +1,23 @@
 import { Alert, AppBar, Box, Chip, Stack, Toolbar, Typography } from '@mui/material';
+import { useCallback, useEffect, useState } from 'react';
+import { RecommendationSign } from './components/RecommendationSign';
+import { RouteCard } from './components/RouteCard';
+import { RouteShield } from './components/RouteShield';
 import { TripForm } from './components/TripForm';
 import { useDemoMode } from './hooks/useDemoMode';
 import { useTripPlan } from './hooks/useTripPlan';
-import { RecommendationSign } from './components/RecommendationSign';
-import { RouteShield } from './components/RouteShield';
 
 export default function App() {
     const { plan, loading, error, planTrip, clearError } = useTripPlan();
     const demoMode = useDemoMode();
+    const [selectedRouteId, setSelectedRouteId] = useState('');
+
+    // A new plan starts on the recommended route.
+    useEffect(() => {
+        if (plan) setSelectedRouteId(plan.recommendation.route_id);
+    }, [plan]);
+
+    const selectRoute = useCallback((routeId: string) => setSelectedRouteId(routeId), []);
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -49,7 +59,16 @@ export default function App() {
                             </Typography>
                         )}
 
-                        {plan && <RecommendationSign recommendation={plan.recommendation} />}
+                        {plan && (
+                            <>
+                                <RecommendationSign recommendation={plan.recommendation} />
+                                <Stack spacing={1.25} component="section" aria-label="Route options">
+                                    {plan.routes.map((route) => (
+                                        <RouteCard key={route.id} route={route} selected={route.id === selectedRouteId} onSelect={selectRoute} />
+                                    ))}
+                                </Stack>
+                            </>
+                        )}
                     </Stack>
                 </Box>
 
