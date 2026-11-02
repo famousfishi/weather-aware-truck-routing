@@ -1,0 +1,14 @@
+### Health
+GET http://127.0.0.1:8000/api/health
+
+### Plan a trip (departure must be within the next 7 days)
+POST http://127.0.0.1:8000/api/trips/plan
+Content-Type: application/json
+
+{
+  "origin": { "query": "Denver, CO" },
+  "destination": { "query": "Chicago, IL" },
+  "departure_time": "2026-11-02T14:00:00Z",
+  "load_weight_lb": 42000,
+  "sample_interval_miles": 25
+}

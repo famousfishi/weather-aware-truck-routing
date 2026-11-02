@@ -1,0 +1,49 @@
+html,
+body,
+#root {
+  height: 100%;
+}
+
+.leaflet-container {
+  font-family: inherit;
+  background: #e8ecea;
+}
+
+/* OpenStreetMap tiles are colorful; turn them light grey so the risk colors stand out. */
+.leaflet-tile-pane {
+  filter: grayscale(1) contrast(0.85) brightness(1.08);
+}
+
+.leaflet-tooltip {
+  font-family: 'Overpass', system-ui, sans-serif;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #1a2421;
+  border: 1px solid #d9dedb;
+  border-radius: 6px;
+  box-shadow: 0 3px 10px rgba(26, 36, 33, 0.14);
+  max-width: 280px;
+  white-space: normal;
+}
+
+.endpoint-label {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Custom map icons draw their own shapes, so drop Leaflet's default white box. */
+.map-icon {
+  background: none;
+  border: none;
+}
+
+.truck-marker {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid #1b4f9c;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 8px rgba(26, 36, 33, 0.3);
+}
